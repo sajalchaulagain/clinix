@@ -1,0 +1,17 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # Treat unsafe argument types as errors early; everything else follows flutter_lints.
+    argument_type_not_assignable: error
+  exclude:
+    - build/**
+    - web/**
+    - windows/**
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    prefer_final_locals: true
+    unawaited_futures: true
+    require_trailing_commas: false

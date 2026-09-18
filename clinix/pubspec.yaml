@@ -1,0 +1,60 @@
+name: clinix
+description: "CliniX - Your Smart Healthcare Companion. Smart Healthcare, Medicine & Blood Support Platform."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Routing
+  go_router: ^14.6.1
+
+  # Networking (abstraction for the future FastAPI backend)
+  dio: ^5.7.0
+
+  # Value equality for models (keeps model code short and testable)
+  equatable: ^2.0.7
+
+  # Local persistence (onboarding flag, settings, local reminders)
+  shared_preferences: ^2.3.3
+
+  # Public environment configuration (.env). NEVER put secrets in it.
+  flutter_dotenv: ^5.2.1
+
+  # Dates
+  intl: ^0.20.3
+
+  # Medicine scanner image picking
+  image_picker: ^1.1.2
+
+  # Local medicine reminder notifications
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+
+  # Firebase integration structure (services are opt-in; app runs in mock mode without it)
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.3.3
+  cloud_firestore: ^5.5.0
+  firebase_messaging: ^15.1.5
+  firebase_storage: ^12.3.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    # .env holds PUBLIC configuration only (see .env.example).
+    # It is gitignored; copy .env.example -> .env before running.
+    - .env
