@@ -1,14 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../app/config/app_config.dart';
+import '../../../core/providers/api_providers.dart';
 import '../../../shared/models/medicine_analysis_model.dart';
 import '../../../shared/models/medicine_model.dart';
+import '../data/api_medicine_repository.dart';
 import '../data/mock_medicine_repository.dart';
 import '../domain/medicine_repository.dart';
 
+/// Returns the real FastAPI-backed repository when USE_MOCK_DATA=false.
 final medicineRepositoryProvider = Provider<MedicineRepository>((ref) {
-  // BACKEND INTEGRATION: replace with ApiMedicineRepository, which uploads
-  // images via ApiClient.uploadImages -> ApiEndpoints.medicineAnalyze.
+  if (!AppConfig.useMockData) {
+    return ApiMedicineRepository(ref.read(apiClientProvider));
+  }
   return MockMedicineRepository();
 });
 

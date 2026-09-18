@@ -1,14 +1,20 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/config/app_config.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/providers/api_providers.dart';
 import '../../../shared/models/chat_message_model.dart';
+import '../data/api_ai_repository.dart';
 import '../data/mock_ai_repository.dart';
 import '../domain/ai_repository.dart';
 
+/// Returns the real FastAPI-backed repository when USE_MOCK_DATA=false,
+/// otherwise returns the mock for offline/UI development.
 final aiRepositoryProvider = Provider<AiRepository>((ref) {
-  // BACKEND INTEGRATION: replace with ApiAiRepository once the FastAPI
-  // `/ai/chat` and `/ayurvedic/chat` contracts are finalized.
+  if (!AppConfig.useMockData) {
+    return ApiAiRepository(ref.read(apiClientProvider));
+  }
   return MockAiRepository();
 });
 

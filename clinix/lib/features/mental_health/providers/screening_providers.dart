@@ -1,15 +1,20 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/config/app_config.dart';
+import '../../../core/providers/api_providers.dart';
 import '../../../shared/models/mental_health_answer_model.dart';
 import '../../../shared/models/mental_health_question_model.dart';
 import '../../../shared/models/mental_health_result_model.dart';
+import '../data/api_mental_health_repository.dart';
 import '../data/mock_mental_health_repository.dart';
 import '../domain/mental_health_repository.dart';
 
+/// Returns the real FastAPI-backed repository when USE_MOCK_DATA=false.
 final mentalHealthRepositoryProvider = Provider<MentalHealthRepository>((ref) {
-  // BACKEND INTEGRATION: replace with the API implementation once the
-  // FastAPI screening contract is finalized.
+  if (!AppConfig.useMockData) {
+    return ApiMentalHealthRepository(ref.read(apiClientProvider));
+  }
   return MockMentalHealthRepository();
 });
 

@@ -1,12 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/config/app_config.dart';
 import '../../../core/errors/app_exception.dart';
+import '../../../core/providers/api_providers.dart';
 import '../../../shared/models/donor_model.dart';
+import '../data/api_donor_repository.dart';
 import '../data/mock_donor_repository.dart';
 import '../domain/donor_repository.dart';
 
+/// Returns the real FastAPI-backed repository when USE_MOCK_DATA=false.
 final donorRepositoryProvider = Provider<DonorRepository>((ref) {
-  // BACKEND INTEGRATION: replace with API implementation (mediated contact).
+  if (!AppConfig.useMockData) {
+    return ApiDonorRepository(ref.read(apiClientProvider));
+  }
   return MockDonorRepository();
 });
 

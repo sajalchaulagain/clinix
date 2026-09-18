@@ -1,11 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/config/app_config.dart';
+import '../../../core/providers/api_providers.dart';
+import '../data/api_doctor_repository.dart';
 import '../data/mock_doctor_repository.dart';
 import '../domain/doctor_repository.dart';
 
+/// Returns the real FastAPI-backed repository when USE_MOCK_DATA=false.
 final doctorRepositoryProvider = Provider<DoctorRepository>((ref) {
-  // BACKEND INTEGRATION: replace MockDoctorRepository with the API
-  // implementation once the FastAPI contract is finalized.
+  if (!AppConfig.useMockData) {
+    return ApiDoctorRepository(ref.read(apiClientProvider));
+  }
   return MockDoctorRepository();
 });
 

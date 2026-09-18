@@ -1,15 +1,20 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/config/app_config.dart';
 import '../../../core/errors/app_exception.dart';
+import '../../../core/providers/api_providers.dart';
 import '../../../shared/models/blood_request_model.dart';
 import '../../../shared/models/blood_stock_model.dart';
+import '../data/api_blood_repository.dart';
 import '../data/mock_blood_repository.dart';
 import '../domain/blood_repository.dart';
 
+/// Returns the real FastAPI-backed repository when USE_MOCK_DATA=false.
 final bloodRepositoryProvider = Provider<BloodRepository>((ref) {
-  // BACKEND INTEGRATION: replace with ApiBloodRepository (FastAPI) or
-  // FirestoreBloodRepository for public, read-mostly data.
+  if (!AppConfig.useMockData) {
+    return ApiBloodRepository(ref.read(apiClientProvider));
+  }
   return MockBloodRepository();
 });
 
