@@ -113,13 +113,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Demo mode: any email + 6-char password signs in.\n'
-                'Use an email containing "admin" to try the admin role.',
-                style: theme.textTheme.bodySmall,
-                textAlign: TextAlign.center,
-              ),
+
             ],
           ),
         ),

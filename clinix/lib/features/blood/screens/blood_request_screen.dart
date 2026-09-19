@@ -70,7 +70,7 @@ class _BloodRequestScreenState extends ConsumerState<BloodRequestScreen> {
         await ref.read(bloodRequestControllerProvider.notifier).submit(request);
     if (!mounted) return;
     if (success) {
-      context.showSnackBar('Blood request submitted. Hospitals are notified (demo).');
+      context.showSnackBar('Blood request submitted. Hospitals are notified.');
       _formKey.currentState?.reset();
       setState(() {
         _bloodGroup = null;

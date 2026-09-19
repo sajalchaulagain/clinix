@@ -174,7 +174,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'CliniX v1.0.0 (demo build)\nCliniX is a healthcare support platform. '
+              'CliniX v1.0.0\nCliniX is a healthcare support platform. '
               'It does not replace professional medical care.',
               style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,

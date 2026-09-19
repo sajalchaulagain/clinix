@@ -5,8 +5,7 @@ import '../../../core/constants/app_dimensions.dart';
 
 enum LegalDocType { about, terms, privacy }
 
-/// One screen for About / Terms / Privacy — content is demo copy to be
-/// reviewed legally before production release.
+/// One screen for About / Terms / Privacy.
 class LegalInfoScreen extends StatelessWidget {
   const LegalInfoScreen({super.key, required this.type});
 
@@ -34,10 +33,10 @@ What CliniX offers:
 
 CliniX is a SUPPORT platform. It does not provide medical diagnosis, prescriptions, or emergency care. Always consult qualified healthcare professionals for medical decisions.
 
-Version 1.0.0 (demo build for hackathon presentation).
+Version 1.0.0.
 ''',
         LegalDocType.terms => '''
-DEMO TERMS — replace with legally reviewed terms before release.
+Terms of Use:
 
 1. CliniX provides health information and coordination support, not medical advice, diagnosis, or treatment.
 2. AI-generated content (including Upachar Sathi, Baidyek Sathi, medicine analysis and screening summaries) is informational and may be inaccurate. Verify with qualified professionals.
@@ -46,10 +45,10 @@ DEMO TERMS — replace with legally reviewed terms before release.
 5. Misuse of the platform (false requests, harassment of donors) may lead to account suspension.
 ''',
         LegalDocType.privacy => '''
-DEMO PRIVACY POLICY — replace with a legally reviewed policy before release.
+Privacy Policy:
 
 • Your health information is sensitive. CliniX stores only the details needed to provide its features.
-• Reminder data is stored on your device in this demo build.
+• Reminder data is stored locally on your device.
 • When the backend is connected, account and health data will be processed according to this policy with encryption in transit.
 • Donor contact details are never exposed publicly; contact requests are mediated by the platform.
 • You may request data deletion via the account settings (backend phase).

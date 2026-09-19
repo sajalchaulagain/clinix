@@ -109,12 +109,7 @@ class ScreeningQuestionsScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Your answers stay on this device in demo mode.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                    textAlign: TextAlign.center,
-                  ),
+
                 ],
               ),
             );

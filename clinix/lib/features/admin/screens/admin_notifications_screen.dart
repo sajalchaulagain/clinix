@@ -43,7 +43,7 @@ class _AdminNotificationsScreenState
     if (!mounted) return;
     context.showSnackBar(
       success
-          ? 'Notification broadcast queued (demo).'
+          ? 'Notification broadcast queued.'
           : 'Could not broadcast the notification.',
       isError: !success,
     );
