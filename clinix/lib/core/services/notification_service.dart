@@ -102,28 +102,51 @@ class NotificationService {
 
   /// Schedules a DAILY repeating notification at [hour]:[minute] local time.
   ///
-  /// [Reminders] map each reminder time to a unique notification id so they can
-  /// be cancelled individually when a reminder is edited or disabled.
-  Future<void> scheduleDaily({
+  /// Returns `true` if scheduled using an exact alarm, or `false` if it fell back
+  /// to inexact scheduling (e.g. exact alarm permission not granted by OS).
+  Future<bool> scheduleDaily({
     required int id,
     required String title,
     required String body,
     required int hour,
     required int minute,
   }) async {
-    if (!_initialized) return;
+    if (!_initialized) return false;
     final scheduled = _nextInstanceOf(hour, minute);
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduled,
-      _details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+    try {
+      await _plugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduled,
+        _details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+      return true;
+    } catch (e) {
+      debugPrint(
+        'Exact alarm scheduling failed ($e); falling back to inexactAllowWhileIdle.',
+      );
+      try {
+        await _plugin.zonedSchedule(
+          id,
+          title,
+          body,
+          scheduled,
+          _details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      } catch (fallbackError) {
+        debugPrint('Fallback inexact zonedSchedule failed: $fallbackError');
+      }
+      return false;
+    }
   }
 
   Future<void> cancel(int id) async {

@@ -25,6 +25,8 @@ final reminderRepositoryProvider = Provider<ReminderRepository>((ref) {
 /// Bump to force reminder list reloads (used by pull-to-refresh on home).
 final remindersRefreshTriggerProvider = StateProvider<int>((ref) => 0);
 
+enum ReminderSaveStatus { successExact, successFallback, failure }
+
 /// Loads + mutates reminders, keeping notification schedules in sync.
 class ReminderListNotifier
     extends AsyncNotifier<List<ReminderModel>> {
@@ -38,14 +40,16 @@ class ReminderListNotifier
     state = AsyncData(await ref.read(reminderRepositoryProvider).getReminders());
   }
 
-  Future<bool> save(ReminderModel reminder, {bool isEdit = false}) async {
+  Future<ReminderSaveStatus> save(ReminderModel reminder, {bool isEdit = false}) async {
     try {
       await ref.read(reminderRepositoryProvider).saveReminder(reminder);
-      await ref.read(reminderServiceProvider).scheduleFor(reminder);
+      final exact = await ref.read(reminderServiceProvider).scheduleFor(reminder);
       await _reload();
-      return true;
+      return exact
+          ? ReminderSaveStatus.successExact
+          : ReminderSaveStatus.successFallback;
     } catch (_) {
-      return false;
+      return ReminderSaveStatus.failure;
     }
   }
 

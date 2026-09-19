@@ -11,22 +11,28 @@ class ReminderService {
   final NotificationService _notifications;
 
   /// Schedules daily notifications for every time slot of [reminder].
-  Future<void> scheduleFor(ReminderModel reminder) async {
+  /// Returns `true` if all time slots were scheduled with exact alarms.
+  Future<bool> scheduleFor(ReminderModel reminder) async {
     // Always cancel stale schedules first (idempotent updates).
     await cancelFor(reminder);
-    if (!reminder.isEnabled) return;
+    if (!reminder.isEnabled) return true;
 
+    bool allExact = true;
     for (var i = 0; i < reminder.times.length; i++) {
       final parts = reminder.times[i].split(':');
       if (parts.length != 2) continue;
-      await _notifications.scheduleDaily(
+      final exact = await _notifications.scheduleDaily(
         id: reminder.notificationIdFor(i),
         title: 'Time for ${reminder.medicineName}',
         body: 'Dose: ${reminder.dosage} • ${reminder.frequency}',
         hour: int.tryParse(parts[0]) ?? 8,
         minute: int.tryParse(parts[1]) ?? 0,
       );
+      if (!exact) {
+        allExact = false;
+      }
     }
+    return allExact;
   }
 
   Future<void> cancelFor(ReminderModel reminder) async {

@@ -130,13 +130,19 @@ class _ReminderFormScreenState extends ConsumerState<ReminderFormScreen> {
       createdAt: existing?.createdAt ?? DateTime.now(),
     );
 
-    final success = await ref
+    final result = await ref
         .read(reminderListProvider.notifier)
         .save(reminder, isEdit: _isEdit);
     if (!mounted) return;
-    if (success) {
+    if (result == ReminderSaveStatus.successExact) {
       context.showSnackBar(
         _isEdit ? 'Reminder updated.' : 'Reminder created — notifications scheduled.',
+      );
+      Navigator.of(context).pop();
+    } else if (result == ReminderSaveStatus.successFallback) {
+      context.showSnackBar(
+        "Couldn't schedule exact alarm - allow Alarms & reminders in system Settings",
+        isError: true,
       );
       Navigator.of(context).pop();
     } else {
