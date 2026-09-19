@@ -31,6 +31,6 @@ class AppConfig {
   static Duration get receiveTimeout => Duration(
         milliseconds:
             int.tryParse(dotenv.maybeGet('API_RECEIVE_TIMEOUT_MS') ?? '') ??
-                20000,
+                90000,
       );
 }

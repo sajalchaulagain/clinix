@@ -21,8 +21,15 @@ class Settings(BaseSettings):
     # OpenRouter (server-side key — Flutter must never see it)
     openrouter_api_key: str | None = None
     openrouter_chat_model: str = "meta-llama/llama-3.1-8b-instruct"
+    openrouter_chat_fallbacks: str = "meta-llama/llama-3.1-8b-instruct:free,google/gemma-3-12b-it:free"
     openrouter_vision_model: str = "google/gemini-2.0-flash-001"
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
+
+    @property
+    def openrouter_chat_fallback_list(self) -> list[str]:
+        if not self.openrouter_chat_fallbacks:
+            return []
+        return [m.strip() for m in self.openrouter_chat_fallbacks.split(",") if m.strip()]
 
     # openFDA / RxNorm
     openfda_api_key: str | None = None

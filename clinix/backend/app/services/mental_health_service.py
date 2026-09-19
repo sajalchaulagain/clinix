@@ -129,6 +129,7 @@ class MentalHealthService:
                     {"role": "user", "content": f"Screening band: {band}. Write the narrative."},
                 ],
                 json_mode=True,
+                fallback_models=self.settings.openrouter_chat_fallback_list,
             )
             text = raw.strip()
             start, end = text.find("{"), text.rfind("}")

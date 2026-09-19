@@ -39,7 +39,7 @@ async def _build_reply(settings: Settings, client: OpenRouterClient,
                           "Describe general, cautious guidance about it."}
         )
 
-    reply = await client.complete_chat(messages)
+    reply = await client.complete_chat(messages, fallback_models=settings.openrouter_chat_fallback_list)
     reply = reply.strip() or "I wasn't able to compose a helpful reply just now. Please try again."
     if DISCLAIMER.lower() not in reply.lower() and "emergency" not in last_text.lower():
         reply = f"{reply}\n\n{DISCLAIMER}"

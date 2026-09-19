@@ -5,6 +5,7 @@ return deterministic, clearly-labelled fixture responses so the whole stack
 works offline in development. Production never fabricates answers: real mode
 without a key raises ExternalServiceError.
 """
+import asyncio
 import json
 import logging
 
@@ -29,12 +30,36 @@ class OpenRouterClient:
         messages: list[dict],
         *,
         model: str | None = None,
+        fallback_models: list[str] | None = None,
         json_mode: bool = False,
     ) -> str:
         """Plain chat completion -> assistant content string."""
         if self._mocking:
             return self._mock_chat(messages, json_mode)
-        return await self._request(messages, model or self._settings.openrouter_chat_model, json_mode)
+
+        primary_model = model or self._settings.openrouter_chat_model
+        fallbacks = fallback_models if fallback_models is not None else self._settings.openrouter_chat_fallback_list
+
+        models_to_try: list[str] = [primary_model]
+        for fb in fallbacks:
+            if fb and fb not in models_to_try:
+                models_to_try.append(fb)
+
+        last_error: Exception | None = None
+        for candidate_model in models_to_try:
+            try:
+                return await self._request(messages, candidate_model, json_mode)
+            except ExternalServiceError as exc:
+                last_error = exc
+                logger.warning(
+                    "OpenRouter attempt failed for model=%s; trying next fallback model if available",
+                    candidate_model,
+                )
+                continue
+
+        if last_error:
+            raise last_error
+        raise ExternalServiceError("AI service", "All AI provider models failed.")
 
     async def complete_vision(self, prompt: str, images_b64: list[str]) -> str:
         """Vision completion with base64 image parts."""
@@ -65,18 +90,52 @@ class OpenRouterClient:
             "HTTP-Referer": "https://clinix.app",
             "X-Title": "CliniX Backend",
         }
-        try:
-            async with httpx.AsyncClient(timeout=self._settings.ai_timeout) as http:
-                response = await http.post(
-                    f"{self._settings.openrouter_base_url}/chat/completions",
-                    json=payload,
-                    headers=headers,
-                )
-                response.raise_for_status()
-                data = response.json()
-        except (httpx.HTTPError, ValueError) as exc:
-            logger.warning("openrouter request failed: %s", exc)
-            raise ExternalServiceError("AI service") from exc
+
+        retried_429 = False
+        retried_400_json = False
+
+        async with httpx.AsyncClient(timeout=self._settings.ai_timeout) as http:
+            while True:
+                try:
+                    response = await http.post(
+                        f"{self._settings.openrouter_base_url}/chat/completions",
+                        json=payload,
+                        headers=headers,
+                    )
+                    status = response.status_code
+                    logger.info("OpenRouter attempt model=%s status=%d", model, status)
+
+                    if status == 429 and not retried_429:
+                        retried_429 = True
+                        logger.info(
+                            "OpenRouter 429 rate limit for model=%s; sleeping 8s before retry", model
+                        )
+                        await asyncio.sleep(8)
+                        continue
+
+                    if status == 400 and json_mode and "response_format" in payload and not retried_400_json:
+                        retried_400_json = True
+                        logger.info(
+                            "OpenRouter 400 bad request for model=%s with json_mode; retrying without response_format",
+                            model,
+                        )
+                        payload.pop("response_format", None)
+                        continue
+
+                    response.raise_for_status()
+                    data = response.json()
+                    break
+                except (httpx.HTTPError, ValueError) as exc:
+                    status_code = getattr(getattr(exc, "response", None), "status_code", None)
+                    logger.warning(
+                        "openrouter request failed for model=%s status=%s: %s",
+                        model,
+                        status_code,
+                        exc,
+                    )
+                    raise ExternalServiceError(
+                        "AI service", f"OpenRouter model {model} failed (status {status_code})"
+                    ) from exc
 
         try:
             return data["choices"][0]["message"]["content"] or ""
