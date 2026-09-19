@@ -1,3 +1,4 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,7 +22,8 @@ class ReminderFormScreen extends ConsumerStatefulWidget {
   ConsumerState<ReminderFormScreen> createState() => _ReminderFormScreenState();
 }
 
-class _ReminderFormScreenState extends ConsumerState<ReminderFormScreen> {
+class _ReminderFormScreenState extends ConsumerState<ReminderFormScreen>
+    with WidgetsBindingObserver {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _dosageController;
@@ -32,11 +34,15 @@ class _ReminderFormScreenState extends ConsumerState<ReminderFormScreen> {
   late DateTime _startDate;
   DateTime? _endDate;
 
+  ReminderModel? _lastSavedReminder;
+  bool _needsExactAlarmRetry = false;
+
   bool get _isEdit => widget.existing != null;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     final existing = widget.existing;
     _nameController = TextEditingController(text: existing?.medicineName ?? '');
     _dosageController = TextEditingController(text: existing?.dosage ?? '');
@@ -49,10 +55,32 @@ class _ReminderFormScreenState extends ConsumerState<ReminderFormScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _nameController.dispose();
     _dosageController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        _needsExactAlarmRetry &&
+        _lastSavedReminder != null) {
+      _retryExactSchedule();
+    }
+  }
+
+  Future<void> _retryExactSchedule() async {
+    final reminder = _lastSavedReminder;
+    if (reminder == null) return;
+    final exactSuccess =
+        await ref.read(reminderServiceProvider).scheduleFor(reminder);
+    if (exactSuccess && mounted) {
+      _needsExactAlarmRetry = false;
+      context.showSnackBar('Exact alarm enabled');
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _pickTime(int index) async {
@@ -140,11 +168,21 @@ class _ReminderFormScreenState extends ConsumerState<ReminderFormScreen> {
       );
       Navigator.of(context).pop();
     } else if (result == ReminderSaveStatus.successFallback) {
-      context.showSnackBar(
-        "Couldn't schedule exact alarm - allow Alarms & reminders in system Settings",
-        isError: true,
+      _lastSavedReminder = reminder;
+      _needsExactAlarmRetry = true;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            "Couldn't schedule exact alarm - allow Alarms & reminders in system Settings",
+          ),
+          action: SnackBarAction(
+            label: 'OPEN SETTINGS',
+            onPressed: () {
+              AppSettings.openAppSettings(type: AppSettingsType.alarm);
+            },
+          ),
+        ),
       );
-      Navigator.of(context).pop();
     } else {
       context.showSnackBar('Could not save the reminder.', isError: true);
     }
