@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/config/app_config.dart';
@@ -51,11 +52,13 @@ class AuthController extends AutoDisposeAsyncNotifier<void> {
       await action();
       state = const AsyncData(null);
       return true;
-    } catch (error) {
-      state = AsyncError(
-        error is AppException ? error : UnknownAppException(cause: error),
-        StackTrace.current,
-      );
+    } catch (error, stackTrace) {
+      final appException =
+          error is AppException ? error : UnknownAppException(cause: error);
+      debugPrint('AuthController error: ${appException.message}');
+      debugPrint('Cause: ${appException.cause}');
+      debugPrint('Stack trace:\n$stackTrace');
+      state = AsyncError(appException, stackTrace);
       return false;
     }
   }

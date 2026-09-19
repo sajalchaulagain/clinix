@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/services/firebase/auth_service.dart';
@@ -62,6 +63,8 @@ class FirebaseAuthRepository implements AuthRepository {
       if (user == null) throw const AuthException('Sign-in failed.');
       return user;
     } on FirebaseAuthException catch (e) {
+      debugPrint(
+          'FIREBASE AUTH CODE: ${e.code} MESSAGE: ${e.message} PLUGIN: ${e.plugin}');
       throw AuthException(_mapFirebaseError(e), cause: e);
     }
   }
@@ -97,6 +100,8 @@ class FirebaseAuthRepository implements AuthRepository {
       await _firestore.setDoc(_usersCollection, uid, user.toJson());
       return user;
     } on FirebaseAuthException catch (e) {
+      debugPrint(
+          'FIREBASE AUTH CODE: ${e.code} MESSAGE: ${e.message} PLUGIN: ${e.plugin}');
       throw AuthException(_mapFirebaseError(e), cause: e);
     }
   }
@@ -145,10 +150,18 @@ class FirebaseAuthRepository implements AuthRepository {
         'Incorrect email or password.',
       'email-already-in-use' => 'An account already exists for this email.',
       'weak-password' => 'Password is too weak. Use at least 6 characters.',
+      'invalid-email' => 'Please enter a valid email address.',
+      'user-disabled' => 'This user account has been disabled.',
+      'operation-not-allowed' =>
+        'Email/password login is not enabled in Firebase Console.',
+      'configuration-not-found' ||
+      'api-key-not-valid' ||
+      'project-not-found' =>
+        'Firebase project configuration error. Please check options.',
       'network-request-failed' =>
         'No internet connection. Please check your network and retry.',
       'too-many-requests' => 'Too many attempts. Please try again later.',
-      _ => 'Authentication failed. Please try again.',
+      _ => 'Authentication failed (${e.code}). Please try again.',
     };
   }
 }

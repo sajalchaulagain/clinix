@@ -9,6 +9,8 @@ import 'core/services/local_storage_service.dart';
 import 'features/reminders/providers/reminder_providers.dart';
 import 'features/settings/providers/settings_providers.dart';
 
+import 'firebase_options.dart';
+
 /// App bootstrapper.
 ///
 /// Order matters:
@@ -27,10 +29,12 @@ Future<void> main() async {
   // been run. Guarded so the app always boots in mock mode.
   if (AppConfig.useFirebase) {
     try {
-      await Firebase.initializeApp();
-    } catch (error) {
-      // Missing firebase_options.dart during development is expected.
-      debugPrint('Firebase initialization skipped: $error');
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      debugPrint('Firebase initialized successfully.');
+    } catch (error, stackTrace) {
+      debugPrint('Firebase initialization failed: $error\n$stackTrace');
     }
   }
 
