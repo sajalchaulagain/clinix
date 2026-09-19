@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # OpenRouter (server-side key — Flutter must never see it)
     openrouter_api_key: str | None = None
     openrouter_chat_model: str = "meta-llama/llama-3.1-8b-instruct"
-    openrouter_chat_fallbacks: str = "meta-llama/llama-3.1-8b-instruct:free,google/gemma-3-12b-it:free"
+    openrouter_chat_fallbacks: str = "google/gemma-4-26b-a4b-it:free,deepseek/deepseek-v4-flash-0731:free,inclusionai/ling-3.0-flash-sante:free"
     openrouter_vision_model: str = "google/gemini-2.0-flash-001"
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 

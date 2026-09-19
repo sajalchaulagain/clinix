@@ -8,6 +8,7 @@ from app.prompts.upachar_prompt import UPACHAR_SYSTEM_PROMPT
 from app.repositories.base import new_id
 from app.schemas.ai import ChatMessage, ChatRequest
 from app.services import safety_service
+from app.services.local_context_service import get_blood_summary, get_hospital_list
 
 DISCLAIMER = "For anything severe, persistent, or worrying, please consult a qualified healthcare professional."
 
@@ -25,6 +26,23 @@ async def _build_reply(settings: Settings, client: OpenRouterClient,
     if safety_service.detect_emergency(last_text):
         return ChatMessage(id=new_id(), text=safety_service.emergency_message(settings),
                            sender="ai", created_at=datetime.now(timezone.utc))
+
+    lower_text = last_text.lower()
+    blood_keywords = {"blood", "donate", "donor", "transfusion", "stock"}
+    hospital_keywords = {"hospital", "doctor", "clinic", "emergency", "ambulance", "ward"}
+
+    grounding_parts = []
+    if any(kw in lower_text for kw in blood_keywords):
+        summary = await get_blood_summary(settings)
+        if summary:
+            grounding_parts.append(f"LIVE LOCAL DATA (Kathmandu Valley, today):\n{summary}")
+    if any(kw in lower_text for kw in hospital_keywords):
+        hospitals = await get_hospital_list(settings)
+        if hospitals:
+            grounding_parts.append(f"LOCAL HOSPITALS (Kathmandu Valley):\n{hospitals}")
+
+    if grounding_parts:
+        system_prompt = system_prompt + "\n\n" + "\n\n".join(grounding_parts)
 
     messages = [{"role": "system", "content": system_prompt}]
     for msg in raw_history[-12:]:  # keep the context window small

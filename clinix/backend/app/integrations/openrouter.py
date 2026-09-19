@@ -127,14 +127,18 @@ class OpenRouterClient:
                     break
                 except (httpx.HTTPError, ValueError) as exc:
                     status_code = getattr(getattr(exc, "response", None), "status_code", None)
+                    resp_obj = getattr(exc, "response", None)
+                    body_text = resp_obj.text if resp_obj is not None else str(exc)
+                    body_snippet = body_text[:300] if body_text else ""
                     logger.warning(
-                        "openrouter request failed for model=%s status=%s: %s",
+                        "openrouter request failed for model=%s status=%s body=%s: %s",
                         model,
                         status_code,
+                        body_snippet,
                         exc,
                     )
                     raise ExternalServiceError(
-                        "AI service", f"OpenRouter model {model} failed (status {status_code})"
+                        "AI service", f"OpenRouter model {model} failed (status {status_code}): {body_snippet}"
                     ) from exc
 
         try:
