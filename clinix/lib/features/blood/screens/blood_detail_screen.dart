@@ -17,7 +17,6 @@ class BloodDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    final colors = context.colors;
 
     return Scaffold(
       appBar: AppBar(title: Text('${stock.bloodGroup} Availability')),

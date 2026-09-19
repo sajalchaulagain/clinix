@@ -22,14 +22,14 @@ def init_firebase(settings: Settings) -> None:
     global _app, _db
     if _db is not None:
         return
+    if settings.mock_external_services:
+        logger.info("Mock mode enabled — using in-memory dev store.")
+        return
     if not settings.firebase_configured:
-        if settings.mock_external_services:
-            logger.info("Firebase not configured — using in-memory dev store.")
-        else:
-            logger.warning(
-                "Firebase Admin credentials are MISSING and mock mode is off. "
-                "Authenticated requests will fail until .env is configured."
-            )
+        logger.warning(
+            "Firebase Admin credentials are MISSING and mock mode is off. "
+            "Authenticated requests will fail until .env is configured."
+        )
         return
 
     private_key = settings.firebase_private_key.replace("\\n", "\n")

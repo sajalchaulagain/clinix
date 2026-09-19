@@ -57,6 +57,9 @@ async def get_current_user(
     if not token:
         raise HTTPException(status_code=401, detail="Authentication required. Please sign in.")
 
+    if settings.mock_external_services and token.startswith("dev-"):
+        return _dev_user(token)
+
     if firebase_ready():
         # Real path: verify the Firebase ID token with the Admin SDK.
         from firebase_admin import auth as firebase_auth

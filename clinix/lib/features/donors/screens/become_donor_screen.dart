@@ -99,7 +99,7 @@ class _BecomeDonorScreenState extends ConsumerState<BecomeDonorScreen> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 DropdownButtonFormField<String>(
-                  value: _bloodGroup,
+                  initialValue: _bloodGroup,
                   decoration: const InputDecoration(
                     labelText: 'Blood Group *',
                     prefixIcon: Icon(Icons.bloodtype_outlined),

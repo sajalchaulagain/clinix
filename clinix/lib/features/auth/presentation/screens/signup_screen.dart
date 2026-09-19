@@ -153,7 +153,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     children: [
                       const SizedBox(height: AppSpacing.sm),
                       DropdownButtonFormField<String>(
-                        value: _bloodGroup,
+                        initialValue: _bloodGroup,
                         decoration: const InputDecoration(
                           labelText: 'Blood Group (optional)',
                           prefixIcon: Icon(Icons.bloodtype_outlined),

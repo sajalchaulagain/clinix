@@ -109,7 +109,7 @@ class _BloodRequestScreenState extends ConsumerState<BloodRequestScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: _bloodGroup,
+                      initialValue: _bloodGroup,
                       decoration: const InputDecoration(
                         labelText: 'Blood Group *',
                         prefixIcon: Icon(Icons.bloodtype_outlined),

@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_dimensions.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../shared/models/medicine_analysis_model.dart';
 import '../providers/medicine_providers.dart';
 import '../widgets/medicine_analysis_view.dart';
 

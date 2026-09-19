@@ -68,7 +68,7 @@ class AiChatScreen extends ConsumerWidget {
                 isDestructive: true,
               );
               if (confirmed) {
-                ref.read(chatControllerProvider(persona).notifier).clear();
+                await ref.read(chatControllerProvider(persona).notifier).clear();
                 if (context.mounted) {
                   context.showSnackBar('Conversation cleared.');
                 }

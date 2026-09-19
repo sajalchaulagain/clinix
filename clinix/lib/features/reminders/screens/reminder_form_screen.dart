@@ -176,7 +176,7 @@ class _ReminderFormScreenState extends ConsumerState<ReminderFormScreen> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
-                  value: _frequency,
+                  initialValue: _frequency,
                   decoration: const InputDecoration(
                     labelText: 'Frequency',
                     prefixIcon: Icon(Icons.repeat),

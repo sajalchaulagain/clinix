@@ -206,7 +206,7 @@ class _StockEditDialogState extends State<_StockEditDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: _bloodGroup,
+                initialValue: _bloodGroup,
                 decoration: const InputDecoration(labelText: 'Blood Group'),
                 items: AppConstants.bloodGroups
                     .map((g) => DropdownMenuItem(value: g, child: Text(g)))

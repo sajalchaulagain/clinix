@@ -44,8 +44,7 @@ class PermissionDeniedException extends AppException {
 }
 
 class NotFoundException extends AppException {
-  const NotFoundException([String message = 'The requested item was not found.'])
-      : super(message);
+  const NotFoundException([super.message = 'The requested item was not found.']);
 }
 
 class ValidationException extends AppException {

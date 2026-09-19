@@ -73,7 +73,6 @@ class _MedicineScannerScreenState extends ConsumerState<MedicineScannerScreen> {
     final images = ref.watch(selectedImagesProvider);
     final analysis = ref.watch(scanAnalysisProvider);
     final theme = context.theme;
-    final colors = context.colors;
 
     return Scaffold(
       appBar: AppBar(

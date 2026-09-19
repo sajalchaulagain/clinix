@@ -5,7 +5,7 @@ import 'medicine_interaction_model.dart';
 /// Result of analyzing a scanned medicine image.
 ///
 /// BACKEND INTEGRATION: produced by FastAPI (OpenRouter vision + openFDA +
-/// RxNorm). Every field is a List<String>/String so the UI can render sections
+/// RxNorm). Every field is a `List<String>`/String so the UI can render sections
 /// generically with [sections]. `isAiGenerated` drives the mandatory safety
 /// labeling in the result UI.
 class MedicineAnalysisModel extends Equatable {
