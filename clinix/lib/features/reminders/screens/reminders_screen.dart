@@ -44,7 +44,22 @@ class RemindersScreen extends ConsumerWidget {
     final reminders = ref.watch(reminderListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Medicine Reminders')),
+      appBar: AppBar(
+        title: const Text('Medicine Reminders'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_active_outlined),
+            tooltip: 'Send test notification',
+            onPressed: () async {
+              await ref.read(notificationServiceProvider).showNow(
+                    id: 999999,
+                    title: 'Test Medicine Reminder',
+                    body: 'Ringtone, vibration, and heads-up test.',
+                  );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: AsyncValueView<List<ReminderModel>>(
           value: reminders,

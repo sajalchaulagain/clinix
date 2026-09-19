@@ -47,7 +47,14 @@ Future<void> main() async {
   final notificationsEnabled =
       container.read(notificationsEnabledProvider);
   if (notificationsEnabled) {
-    await container.read(notificationServiceProvider).init();
+    try {
+      await container.read(notificationServiceProvider).init();
+      final reminders =
+          await container.read(reminderRepositoryProvider).getReminders();
+      await container.read(reminderServiceProvider).rescheduleAll(reminders);
+    } catch (e) {
+      debugPrint('Failed to reschedule notifications on boot: $e');
+    }
   }
   container.dispose();
 

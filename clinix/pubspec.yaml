@@ -38,6 +38,7 @@ dependencies:
   # Local medicine reminder notifications
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
+  flutter_timezone: ^5.1.0
 
   # Firebase integration structure (services are opt-in; app runs in mock mode without it)
   firebase_core: ^3.8.0
