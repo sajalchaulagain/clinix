@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 
 import '../../../app/config/app_config.dart';
 import '../../../core/constants/app_strings.dart';
@@ -70,6 +72,7 @@ class ChatController extends AutoDisposeFamilyNotifier<ChatState, AiPersona> {
   }
 
   Future<void> send(String text, {String? attachmentPath}) async {
+    if (state.isTyping) return;
     final trimmed = text.trim();
     if (trimmed.isEmpty && attachmentPath == null) return;
 
@@ -98,6 +101,12 @@ class ChatController extends AutoDisposeFamilyNotifier<ChatState, AiPersona> {
         isTyping: false,
       );
     } catch (e) {
+      debugPrint('Chat error: $e');
+      if (e is DioException) {
+        debugPrint('DioException [${e.type}]: ${e.message}');
+        debugPrint('StatusCode: ${e.response?.statusCode}');
+        debugPrint('Response Data: ${e.response?.data}');
+      }
       state = state.copyWith(
         isTyping: false,
         errorMessage:

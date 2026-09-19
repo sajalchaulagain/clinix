@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -245,7 +244,20 @@ class _ImageTile extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.file(File(image.path), fit: BoxFit.cover),
+          FutureBuilder<Uint8List>(
+            future: image.readAsBytes(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError || !snapshot.hasData) {
+                return const Center(child: Icon(Icons.error));
+              }
+              return Image.memory(
+                snapshot.data!,
+                fit: BoxFit.cover,
+              );
+            },
+          ),
           Positioned(
             left: AppSpacing.sm,
             bottom: AppSpacing.sm,

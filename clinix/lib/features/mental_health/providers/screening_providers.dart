@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 
 import '../../../app/config/app_config.dart';
 import '../../../core/providers/api_providers.dart';
@@ -99,6 +101,12 @@ class ScreeningController extends AutoDisposeNotifier<ScreeningState> {
           await ref.read(mentalHealthRepositoryProvider).analyze(answers);
       state = state.copyWith(stage: ScreeningStage.done, result: result);
     } catch (e) {
+      debugPrint('Screening error: $e');
+      if (e is DioException) {
+        debugPrint('DioException [${e.type}]: ${e.message}');
+        debugPrint('StatusCode: ${e.response?.statusCode}');
+        debugPrint('Response Data: ${e.response?.data}');
+      }
       state = state.copyWith(
         stage: ScreeningStage.answering,
         error: 'Could not analyze your answers right now. Please try again.',

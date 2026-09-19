@@ -77,7 +77,7 @@ class ApiClient {
       formData.files.add(
         MapEntry(
           fieldName,
-          await MultipartFile.fromFile(image.path, filename: image.name),
+          MultipartFile.fromBytes(await image.readAsBytes(), filename: image.name),
         ),
       );
     }

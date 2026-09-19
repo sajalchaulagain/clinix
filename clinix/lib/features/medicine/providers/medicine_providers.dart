@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../app/config/app_config.dart';
@@ -55,6 +57,12 @@ class ScanAnalysisController
       final results = await ref.read(medicineRepositoryProvider).analyzeImages(images);
       state = AsyncData(results);
     } catch (error, stack) {
+      debugPrint('Analysis error: $error');
+      if (error is DioException) {
+        debugPrint('DioException [${error.type}]: ${error.message}');
+        debugPrint('StatusCode: ${error.response?.statusCode}');
+        debugPrint('Response Data: ${error.response?.data}');
+      }
       state = AsyncError(error, stack);
     }
   }
