@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/config/app_config.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/providers/api_providers.dart';
+import '../../../shared/models/blood_donation_model.dart';
 import '../../../shared/models/blood_request_model.dart';
 import '../../../shared/models/blood_stock_model.dart';
 import '../data/api_blood_repository.dart';
 import '../data/mock_blood_repository.dart';
 import '../domain/blood_repository.dart';
+
 
 /// Returns the real FastAPI-backed repository when USE_MOCK_DATA=false.
 final bloodRepositoryProvider = Provider<BloodRepository>((ref) {
@@ -126,3 +128,51 @@ class BloodRequestController extends AutoDisposeAsyncNotifier<void> {
 
 final bloodRequestControllerProvider = AutoDisposeAsyncNotifierProvider<
     BloodRequestController, void>(BloodRequestController.new);
+
+/// The user's own donation requests.
+final myDonationRequestsProvider =
+    FutureProvider.autoDispose<List<BloodDonationModel>>((ref) {
+  return ref.watch(bloodRepositoryProvider).fetchMyDonationRequests();
+});
+
+/// Form submission handler with AsyncValue state for the donation request screen.
+class DonationRequestController extends AutoDisposeAsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<bool> submit(BloodDonationModel donation) async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(bloodRepositoryProvider).submitDonationRequest(donation);
+      ref.invalidate(myDonationRequestsProvider);
+      state = const AsyncData(null);
+      return true;
+    } catch (error) {
+      state = AsyncError(
+        error is AppException ? error : UnknownAppException(cause: error),
+        StackTrace.current,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> cancel(String id) async {
+    state = const AsyncLoading();
+    try {
+      await ref.read(bloodRepositoryProvider).cancelDonationRequest(id);
+      ref.invalidate(myDonationRequestsProvider);
+      state = const AsyncData(null);
+      return true;
+    } catch (error) {
+      state = AsyncError(
+        error is AppException ? error : UnknownAppException(cause: error),
+        StackTrace.current,
+      );
+      return false;
+    }
+  }
+}
+
+final donationRequestControllerProvider = AutoDisposeAsyncNotifierProvider<
+    DonationRequestController, void>(DonationRequestController.new);
+

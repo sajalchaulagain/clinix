@@ -18,7 +18,9 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/providers/auth_providers.dart';
 import '../../features/ayurvedic/screens/ayurvedic_screen.dart';
 import '../../features/blood/screens/blood_detail_screen.dart';
+import '../../features/blood/screens/blood_donation_request_screen.dart';
 import '../../features/blood/screens/blood_request_screen.dart';
+
 import '../../features/blood/screens/blood_stock_screen.dart';
 import '../../features/doctors/screens/doctor_detail_screen.dart';
 import '../../features/doctors/screens/doctors_screen.dart';
@@ -221,6 +223,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/blood-request',
         builder: (context, state) =>
             BloodRequestScreen(initialBloodGroup: state.extra as String?),
+      ),
+      GoRoute(
+        path: '/blood/donate-request',
+        builder: (context, state) => const BloodDonationRequestScreen(),
       ),
       GoRoute(
         path: '/blood/:id',

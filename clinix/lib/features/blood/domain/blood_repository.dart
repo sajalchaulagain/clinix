@@ -1,7 +1,8 @@
+import '../../../shared/models/blood_donation_model.dart';
 import '../../../shared/models/blood_request_model.dart';
 import '../../../shared/models/blood_stock_model.dart';
 
-/// Contract for blood stock & requests.
+/// Contract for blood stock, requests & donation requests.
 abstract class BloodRepository {
   /// Search availability. All filters optional; combine as needed.
   Future<List<BloodStockModel>> getBloodStock({
@@ -17,4 +18,12 @@ abstract class BloodRepository {
   Future<BloodRequestModel> submitRequest(BloodRequestModel request);
 
   Future<List<BloodRequestModel>> getMyRequests();
+
+  // ---- donation requests ----
+  Future<BloodDonationModel> submitDonationRequest(BloodDonationModel donation);
+
+  Future<List<BloodDonationModel>> fetchMyDonationRequests();
+
+  Future<BloodDonationModel> cancelDonationRequest(String id);
 }
+

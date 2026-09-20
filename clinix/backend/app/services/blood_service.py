@@ -7,14 +7,22 @@ stock transactionally via the repository.
 from fastapi import HTTPException
 
 from app.repositories.blood_repository import BloodRepository
-from app.schemas.blood import (BloodRequestCreate, BloodStockUpsert,
-                                BloodRequestStatus)
+from app.schemas.blood import (BloodRequestCreate, BloodRequestStatus,
+                                BloodStockUpsert, DonationRequestCreate,
+                                DonationRequestStatus)
 
 # Explicit lifecycle — the UI hints at these transitions.
 _ALLOWED_TRANSITIONS: dict[str, set[str]] = {
     "pending": {"approved", "fulfilled", "cancelled"},
     "approved": {"fulfilled", "cancelled"},
     "fulfilled": set(),
+    "cancelled": set(),
+}
+
+_DONATION_ALLOWED_TRANSITIONS: dict[str, set[str]] = {
+    "pending": {"confirmed", "completed", "cancelled"},
+    "confirmed": {"completed", "cancelled"},
+    "completed": set(),
     "cancelled": set(),
 }
 
@@ -55,3 +63,38 @@ class BloodService:
         updated = await self.repo.update_request_status(request_id, new_status)
         assert updated is not None
         return updated
+
+    # -------------------------------------------------------- donation requests
+    async def create_donation_request(
+        self, user_uid: str, payload: DonationRequestCreate
+    ) -> dict:
+        data = payload.model_dump() | {"user_id": user_uid}
+        return await self.repo.create_donation_request(data)
+
+    async def list_my_donation_requests(self, user_uid: str) -> list[dict]:
+        return await self.repo.list_donation_requests(user_uid)
+
+    async def get_donation_request(self, don_req_id: str, user_uid: str) -> dict:
+        row = await self.repo.get_donation_request(don_req_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail="Donation request not found.")
+        if row.get("user_id") != user_uid:
+            raise HTTPException(status_code=403, detail="Not your donation request.")
+        return row
+
+    async def cancel_donation_request(self, don_req_id: str, user_uid: str) -> dict:
+        row = await self.repo.get_donation_request(don_req_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail="Donation request not found.")
+        if row.get("user_id") != user_uid:
+            raise HTTPException(status_code=403, detail="Not your donation request.")
+        current = row.get("status", "pending")
+        if "cancelled" not in _DONATION_ALLOWED_TRANSITIONS.get(current, set()):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Cannot cancel a donation request with status '{current}'.",
+            )
+        updated = await self.repo.update_donation_request_status(don_req_id, "cancelled")
+        assert updated is not None
+        return updated
+

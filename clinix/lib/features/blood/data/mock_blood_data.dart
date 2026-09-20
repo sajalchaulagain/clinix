@@ -1,3 +1,4 @@
+import '../../../shared/models/blood_donation_model.dart';
 import '../../../shared/models/blood_request_model.dart';
 import '../../../shared/models/blood_stock_model.dart';
 import '../../../shared/models/donor_model.dart';
@@ -209,4 +210,49 @@ class MockBloodDataStore {
     requests.insert(0, stored);
     return stored;
   }
+
+  final List<BloodDonationModel> donationRequests = [];
+  int _nextDonationId = 1;
+
+  BloodDonationModel addDonationRequest(BloodDonationModel donation) {
+    final stored = BloodDonationModel(
+      id: 'don-req-${_nextDonationId++}',
+      userId: 'mock-user',
+      donorName: donation.donorName,
+      phone: donation.phone,
+      bloodGroup: donation.bloodGroup,
+      units: donation.units,
+      hospitalName: donation.hospitalName,
+      location: donation.location,
+      status: DonationRequestStatus.pending,
+      createdAt: DateTime.now(),
+      preferredDate: donation.preferredDate,
+      notes: donation.notes,
+    );
+    donationRequests.insert(0, stored);
+    return stored;
+  }
+
+  BloodDonationModel cancelDonationRequest(String id) {
+    final idx = donationRequests.indexWhere((d) => d.id == id);
+    if (idx == -1) throw StateError('Donation request not found: $id');
+    final old = donationRequests[idx];
+    final updated = BloodDonationModel(
+      id: old.id,
+      userId: old.userId,
+      donorName: old.donorName,
+      phone: old.phone,
+      bloodGroup: old.bloodGroup,
+      units: old.units,
+      hospitalName: old.hospitalName,
+      location: old.location,
+      status: DonationRequestStatus.cancelled,
+      createdAt: old.createdAt,
+      preferredDate: old.preferredDate,
+      notes: old.notes,
+    );
+    donationRequests[idx] = updated;
+    return updated;
+  }
 }
+

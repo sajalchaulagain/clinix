@@ -1,3 +1,4 @@
+import '../../../shared/models/blood_donation_model.dart';
 import '../../../shared/models/blood_request_model.dart';
 import '../../../shared/models/blood_stock_model.dart';
 import '../domain/blood_repository.dart';
@@ -65,4 +66,25 @@ class MockBloodRepository implements BloodRepository {
     // Demo: every request in the store belongs to "this user".
     return List.unmodifiable(_store.requests);
   }
+
+  // ---------------------------------------------------------------- donations
+  @override
+  Future<BloodDonationModel> submitDonationRequest(
+      BloodDonationModel donation) async {
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    return _store.addDonationRequest(donation);
+  }
+
+  @override
+  Future<List<BloodDonationModel>> fetchMyDonationRequests() async {
+    await _latency();
+    return List.unmodifiable(_store.donationRequests);
+  }
+
+  @override
+  Future<BloodDonationModel> cancelDonationRequest(String id) async {
+    await _latency();
+    return _store.cancelDonationRequest(id);
+  }
 }
+

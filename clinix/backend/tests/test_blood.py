@@ -61,3 +61,60 @@ def test_status_transition_rules(client, admin_headers):
                           json={"status": "approved"})
     assert response.status_code == 200
     assert response.json()["status"] == "approved"
+
+
+# -------------------------------------------------------- donation requests
+_DONATION_PAYLOAD = {
+    "donor_name": "Hari Prasad",
+    "phone": "+977-9812345678",
+    "blood_group": "O+",
+    "units": 1,
+    "hospital_name": "Patan Hospital",
+    "location": "Lalitpur",
+}
+
+
+def test_donation_request_unauthenticated(client):
+    response = client.post("/api/v1/blood/donation-requests", json=_DONATION_PAYLOAD)
+    assert response.status_code == 401
+
+
+def test_create_donation_request_appears_in_my(client, user_headers):
+    resp = client.post("/api/v1/blood/donation-requests",
+                       headers=user_headers, json=_DONATION_PAYLOAD)
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["status"] == "pending"
+    assert body["donor_name"] == "Hari Prasad"
+    assert body["blood_group"] == "O+"
+
+    mine = client.get("/api/v1/blood/donation-requests/my", headers=user_headers)
+    assert mine.status_code == 200
+    assert any(r["id"] == body["id"] for r in mine.json())
+
+
+def test_cancel_donation_request(client, user_headers):
+    resp = client.post("/api/v1/blood/donation-requests",
+                       headers=user_headers, json=_DONATION_PAYLOAD)
+    assert resp.status_code == 201
+    don_id = resp.json()["id"]
+
+    cancel = client.put(f"/api/v1/blood/donation-requests/{don_id}/cancel",
+                        headers=user_headers)
+    assert cancel.status_code == 200
+    assert cancel.json()["status"] == "cancelled"
+
+
+def test_donation_phone_validation(client, user_headers):
+    bad = {**_DONATION_PAYLOAD, "phone": "123"}
+    resp = client.post("/api/v1/blood/donation-requests",
+                       headers=user_headers, json=bad)
+    assert resp.status_code == 422
+
+
+def test_donation_units_max_2(client, user_headers):
+    bad = {**_DONATION_PAYLOAD, "units": 5}
+    resp = client.post("/api/v1/blood/donation-requests",
+                       headers=user_headers, json=bad)
+    assert resp.status_code == 422
+

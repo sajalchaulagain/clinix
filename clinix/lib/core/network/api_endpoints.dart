@@ -36,6 +36,16 @@ class ApiEndpoints {
   static String bloodRequestStatus(String id) =>
       '/api/v1/blood/requests/$id/status';
 
+  // Blood donation requests
+  static const String bloodDonationRequests = '/api/v1/blood/donation-requests';
+  static const String bloodDonationRequestsMy =
+      '/api/v1/blood/donation-requests/my';
+  static String bloodDonationRequestById(String id) =>
+      '/api/v1/blood/donation-requests/$id';
+  static String bloodDonationRequestCancel(String id) =>
+      '/api/v1/blood/donation-requests/$id/cancel';
+
+
   // Donors (contact details are never returned by the backend)
   static const String donors = '/api/v1/donors';
   static const String donorMe = '/api/v1/donors/me';

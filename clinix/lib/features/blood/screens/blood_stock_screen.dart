@@ -25,9 +25,9 @@ class BloodStockScreen extends ConsumerWidget {
         title: const Text('Blood Stock'),
         actions: [
           IconButton(
-            tooltip: 'My blood requests',
-            icon: const Icon(Icons.assignment_outlined),
-            onPressed: () => context.push('/blood-request'),
+            tooltip: 'Donate blood',
+            icon: const Icon(Icons.volunteer_activism_outlined),
+            onPressed: () => context.push('/blood/donate-request'),
           ),
         ],
       ),

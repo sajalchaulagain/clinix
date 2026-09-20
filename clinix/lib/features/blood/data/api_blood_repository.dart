@@ -1,5 +1,6 @@
 import '../../../core/network/api_endpoints.dart';
 import '../../../core/providers/api_providers.dart';
+import '../../../shared/models/blood_donation_model.dart';
 import '../../../shared/models/blood_request_model.dart';
 import '../../../shared/models/blood_stock_model.dart';
 import '../domain/blood_repository.dart';
@@ -119,4 +120,55 @@ class ApiBloodRepository implements BloodRepository {
         .map(BloodRequestModel.fromJson)
         .toList();
   }
+
+  // ---------------------------------------------------------------- donations
+  @override
+  Future<BloodDonationModel> submitDonationRequest(
+      BloodDonationModel donation) async {
+    final client = await _factory.build();
+    final body = {
+      'donor_name': donation.donorName,
+      'phone': donation.phone,
+      'blood_group': donation.bloodGroup,
+      'units': donation.units,
+      'hospital_name': donation.hospitalName,
+      'location': donation.location,
+      if (donation.preferredDate != null)
+        'preferred_date':
+            donation.preferredDate!.toIso8601String().substring(0, 10),
+      if (donation.notes != null && donation.notes!.isNotEmpty)
+        'notes': donation.notes,
+    };
+    final response = await client.post<Map<String, dynamic>>(
+      ApiEndpoints.bloodDonationRequests,
+      data: body,
+    );
+    final data = response.data;
+    if (data == null) throw const FormatException('Empty response from server.');
+    return BloodDonationModel.fromJson(data);
+  }
+
+  @override
+  Future<List<BloodDonationModel>> fetchMyDonationRequests() async {
+    final client = await _factory.build();
+    final response = await client.get<List<dynamic>>(
+      ApiEndpoints.bloodDonationRequestsMy,
+    );
+    return (response.data ?? [])
+        .whereType<Map<String, dynamic>>()
+        .map(BloodDonationModel.fromJson)
+        .toList();
+  }
+
+  @override
+  Future<BloodDonationModel> cancelDonationRequest(String id) async {
+    final client = await _factory.build();
+    final response = await client.put<Map<String, dynamic>>(
+      ApiEndpoints.bloodDonationRequestCancel(id),
+    );
+    final data = response.data;
+    if (data == null) throw const FormatException('Empty response from server.');
+    return BloodDonationModel.fromJson(data);
+  }
 }
+

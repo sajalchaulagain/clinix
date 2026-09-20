@@ -12,6 +12,7 @@ from app.repositories.base import COLLECTIONS, MEMORY, Repository, doc_to_dict, 
 class BloodRepository(Repository):
     stock_col = COLLECTIONS["blood_stock"]
     req_col = COLLECTIONS["blood_requests"]
+    don_req_col = COLLECTIONS["blood_donation_requests"]
     hosp_col = COLLECTIONS["hospitals"]
 
     # ------------------------------------------------------------------ stock
@@ -199,3 +200,49 @@ class BloodRepository(Repository):
         elif hospital_id in MEMORY.hospitals:
             MEMORY.hospitals[hospital_id]["blood_units_by_group"] = units
             MEMORY.hospitals[hospital_id]["last_updated"] = utcnow()
+
+    # -------------------------------------------------------- donation requests
+    async def list_donation_requests(self, user_uid: str) -> list[dict]:
+        rows = await self._all(self.don_req_col, MEMORY.blood_donation_requests)
+        return sorted(
+            (r for r in rows if r.get("user_id") == user_uid),
+            key=lambda r: r.get("created_at") or datetime.min,
+            reverse=True,
+        )
+
+    async def get_donation_request(self, don_req_id: str) -> dict | None:
+        if self.db is not None:
+            snap = await self.run(
+                self.db.collection(self.don_req_col).document(don_req_id).get
+            )
+            return doc_to_dict(snap) if snap.exists else None
+        return MEMORY.blood_donation_requests.get(don_req_id)
+
+    async def create_donation_request(self, data: dict) -> dict:
+        don_req_id = new_id()
+        data = {**data, "id": don_req_id, "status": "pending", "created_at": utcnow()}
+        if self.db is not None:
+            await self.run(
+                self.db.collection(self.don_req_col).document(don_req_id).set, data
+            )
+        else:
+            MEMORY.blood_donation_requests[don_req_id] = data
+        return data
+
+    async def update_donation_request_status(
+        self, don_req_id: str, status: str
+    ) -> dict | None:
+        patch = {"status": status, "updated_at": utcnow()}
+        if self.db is not None:
+            ref = self.db.collection(self.don_req_col).document(don_req_id)
+            snap = await self.run(ref.get)
+            if not snap.exists:
+                return None
+            await self.run(ref.set, patch, merge=True)
+            return doc_to_dict(await self.run(ref.get))
+        row = MEMORY.blood_donation_requests.get(don_req_id)
+        if row is None:
+            return None
+        row.update(patch)
+        return row
+

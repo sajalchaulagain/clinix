@@ -8,7 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.core.security import CurrentUser, get_current_user, require_admin
 from app.repositories.blood_repository import BloodRepository
 from app.schemas.blood import (BloodRequest, BloodRequestCreate,
-                                BloodRequestStatusUpdate, BloodStock)
+                                BloodRequestStatusUpdate, BloodStock,
+                                DonationRequest, DonationRequestCreate)
 from app.services.blood_service import BloodService
 
 router = APIRouter(prefix="/blood", tags=["blood"])
@@ -77,3 +78,44 @@ async def set_status(request_id: str, payload: BloodRequestStatusUpdate,
     service = BloodService(BloodRepository())
     row = await service.change_status(request_id, payload.status)
     return BloodRequest(**row)
+
+
+# -------------------------------------------------------- donation requests
+@router.post("/donation-requests", response_model=DonationRequest, status_code=201)
+async def create_donation_request(
+    payload: DonationRequestCreate,
+    user: CurrentUser = Depends(get_current_user),
+) -> DonationRequest:
+    service = BloodService(BloodRepository())
+    row = await service.create_donation_request(user.uid, payload)
+    return DonationRequest(**row)
+
+
+@router.get("/donation-requests/my", response_model=list[DonationRequest])
+async def my_donation_requests(
+    user: CurrentUser = Depends(get_current_user),
+) -> list[DonationRequest]:
+    service = BloodService(BloodRepository())
+    rows = await service.list_my_donation_requests(user.uid)
+    return [DonationRequest(**r) for r in rows]
+
+
+@router.get("/donation-requests/{don_req_id}", response_model=DonationRequest)
+async def get_donation_request(
+    don_req_id: str,
+    user: CurrentUser = Depends(get_current_user),
+) -> DonationRequest:
+    service = BloodService(BloodRepository())
+    row = await service.get_donation_request(don_req_id, user.uid)
+    return DonationRequest(**row)
+
+
+@router.put("/donation-requests/{don_req_id}/cancel", response_model=DonationRequest)
+async def cancel_donation_request(
+    don_req_id: str,
+    user: CurrentUser = Depends(get_current_user),
+) -> DonationRequest:
+    service = BloodService(BloodRepository())
+    row = await service.cancel_donation_request(don_req_id, user.uid)
+    return DonationRequest(**row)
+

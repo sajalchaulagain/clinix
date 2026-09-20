@@ -27,6 +27,7 @@ COLLECTIONS = {
     "users": "users",
     "blood_stock": "blood_stock",
     "blood_requests": "blood_requests",
+    "blood_donation_requests": "blood_donation_requests",
     "donors": "donors",
     "hospitals": "hospitals",
     "doctors": "doctors",
@@ -121,6 +122,7 @@ class MemoryStore:
         self.reminders: dict[str, dict[str, dict]] = {}
         self.notifications: dict[str, dict[str, dict]] = {}
         self.device_tokens: dict[str, set[str]] = {}
+        self.blood_donation_requests: dict[str, dict] = {}
 
 
 MEMORY = MemoryStore()
