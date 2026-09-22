@@ -41,12 +41,14 @@ dependencies:
   flutter_timezone: ^5.1.0
   app_settings: ^9.0.0
 
+  # Application info & deep linking (self-update feature)
+  package_info_plus: ^8.1.2
+  url_launcher: ^6.3.1
+
   # Firebase integration structure (services are opt-in; app runs in mock mode without it)
   firebase_core: ^3.8.0
   firebase_auth: ^5.3.3
   cloud_firestore: ^5.5.0
-  firebase_messaging: ^15.1.5
-  firebase_storage: ^12.3.6
 
 dev_dependencies:
   flutter_test:
