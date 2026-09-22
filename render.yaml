@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: clinix-api
+    runtime: docker
+    rootDir: clinix/backend
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: MOCK_EXTERNAL_SERVICES
+        value: "false"
+      - key: ALLOWED_ORIGINS
+        value: https://sajalchaulagain.com.np
+      - key: OPENROUTER_CHAT_MODEL
+        value: meta-llama/llama-3.1-8b-instruct
+      - key: OPENROUTER_VISION_MODEL
+        value: google/gemini-2.0-flash-001
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
