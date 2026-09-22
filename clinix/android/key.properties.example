@@ -1,0 +1,15 @@
+# Android Release Signing Configuration Example
+# Copy this file to key.properties in the clinix/android directory and fill in your actual values.
+# NEVER commit key.properties or keystore files to source control!
+
+# Password for the keystore containing the signing key
+storePassword=YOUR_STORE_PASSWORD
+
+# Password for the specific key within the keystore
+keyPassword=YOUR_KEY_PASSWORD
+
+# The alias assigned to the signing key when created (e.g., upload)
+keyAlias=YOUR_KEY_ALIAS
+
+# Relative path from clinix/android/app or absolute path to your keystore file (e.g., upload-keystore.jks or ../upload-keystore.jks)
+storeFile=upload-keystore.jks
