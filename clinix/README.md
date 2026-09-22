@@ -159,20 +159,89 @@ Use an email containing **"admin"** (e.g. `admin@clinix.app`) to preview the adm
 
 ---
 
-## 🔥 Firebase Setup (optional, for real auth later)
+## 🔥 Firebase Setup (after package rename)
 
-1. Create a Firebase project, then run:
+1. Add Android application `com.sajalchaulagain.clinix` in Firebase Console.
+2. Download updated `google-services.json` to `clinix/android/app/`.
+3. Run FlutterFire CLI to update configuration:
    ```bash
    dart pub global activate flutterfire_cli
    flutterfire configure          # generates lib/firebase_options.dart
    ```
-2. In `.env`, set `USE_FIREBASE=true` and `USE_MOCK_DATA=false`.
-3. `authRepositoryProvider` then binds `FirebaseAuthRepository`
-   (Firebase Auth + `users` Firestore collection) instead of the mock.
-4. Configure Firestore **security rules** and admin **custom claims** server-side —
-   the app never grants itself roles.
+4. Register the release SHA-1 fingerprint in Firebase Console (required if Google Sign-In is used). Retrieve SHA-1 using:
+   ```bash
+   keytool -list -v -keystore android/upload-keystore.jks -alias upload
+   ```
+5. In `.env`, set `USE_FIREBASE=true` and `USE_MOCK_DATA=false`.
+6. Configure Firestore **security rules** and admin **custom claims** server-side — the app never grants itself roles.
 
 No `google-services.json` / `firebase_options.dart` is committed (gitignored).
+
+---
+
+## 🌐 Deployment (Render.com)
+
+Deploying `clinix/backend` on Render.com:
+
+### Option A: Render Blueprint (Recommended)
+Connect your GitHub repository to Render and deploy using the root `render.yaml` blueprint. Render automatically provisions the web service with all configuration settings.
+
+### Option B: Manual Web Service Setup
+- **Service Type**: Web Service
+- **Runtime**: Docker
+- **Root Directory**: `clinix/backend`
+- **Region**: Singapore
+- **Branch**: `main`
+- **Health Check Path**: `/api/v1/health`
+
+### Environment Variables
+
+| Variable | Recommended / Example Value | Description |
+|---|---|---|
+| `APP_ENV` | `production` | Application environment mode |
+| `DEBUG` | `false` | Enable/disable debug output |
+| `MOCK_EXTERNAL_SERVICES` | `false` | Set `false` for live integrations |
+| `ALLOWED_ORIGINS` | `https://sajalchaulagain.com.np` | CORS allowed origin domains |
+| `OPENROUTER_CHAT_MODEL` | `meta-llama/llama-3.1-8b-instruct` | OpenRouter chat model identifier |
+| `OPENROUTER_VISION_MODEL` | `google/gemini-2.0-flash-001` | OpenRouter vision model identifier |
+| `FIREBASE_PROJECT_ID` | *(Secret)* | Firebase project ID |
+| `FIREBASE_CLIENT_EMAIL` | *(Secret)* | Service account client email |
+| `FIREBASE_PRIVATE_KEY` | *(Secret)* | Service account private key |
+| `OPENROUTER_API_KEY` | *(Secret)* | OpenRouter API Key |
+
+> [!NOTE]
+> **Free Tier Spin-Down Note**: Render free-tier web services automatically enter a sleep state after 15 minutes of inactivity. Initial cold-start requests may take up to 50 seconds to respond.
+
+---
+
+## 📦 Release Builds (Android)
+
+To build a signed release APK for Android:
+
+### 1. Generate a Keystore
+Run `keytool` to create a signing key in `clinix/android/upload-keystore.jks`:
+```bash
+keytool -genkey -v -keystore upload-keystore.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+```
+
+### 2. Create `key.properties`
+Copy `clinix/android/key.properties.example` to `clinix/android/key.properties` and populate the fields:
+- `storePassword`: Keystore password
+- `keyPassword`: Key password
+- `keyAlias`: Key alias (e.g. `upload`)
+- `storeFile`: Path to keystore file (e.g. `upload-keystore.jks`)
+
+### 3. Build Release APK
+Copy `clinix/.env.release.example` to `clinix/.env` and update `API_BASE_URL` with your Render backend URL, then run:
+```bash
+flutter build apk --release
+```
+
+### 4. Publishing to GitHub Releases
+When publishing a release on GitHub, rename the generated APK (`build/app/outputs/flutter-apk/app-release.apk`) to **`CliniX.apk`**.
+This ensures that the latest release binary is always accessible at:
+`https://github.com/sajalchaulagain/clinix/releases/latest/download/CliniX.apk`
+
 
 ---
 
