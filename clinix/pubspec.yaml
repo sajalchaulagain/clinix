@@ -1,7 +1,7 @@
 name: clinix
 description: "CliniX - Your Smart Healthcare Companion. Smart Healthcare, Medicine & Blood Support Platform."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.6.0
