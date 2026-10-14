@@ -76,9 +76,16 @@ class RoutePaths {
 /// whenever auth/onboarding state changes.
 class RouterRefreshNotifier extends ChangeNotifier {
   RouterRefreshNotifier(Ref ref) {
-    _authSub = ref.listen(authStateProvider, (_, __) => notifyListeners());
-    _onboardingSub =
-        ref.listen(onboardingCompleteProvider, (_, __) => notifyListeners());
+    _authSub = ref.listen(
+      authStateProvider,
+      (_, __) => notifyListeners(),
+      fireImmediately: true,
+    );
+    _onboardingSub = ref.listen(
+      onboardingCompleteProvider,
+      (_, __) => notifyListeners(),
+      fireImmediately: true,
+    );
   }
 
   late final ProviderSubscription _authSub;

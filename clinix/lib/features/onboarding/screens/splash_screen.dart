@@ -1,12 +1,42 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/router/app_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_dimensions.dart';
 
 /// Shown briefly while the app initializes (storage, auth state restore).
-/// The GoRouter redirect decides where to go next — the splash has no logic.
-class SplashScreen extends StatelessWidget {
+/// The GoRouter redirect decides where to go next; includes a one-shot safety
+/// timeout to escape splash if a platform-level delay stalls the initial redirect.
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  Timer? _safetyTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _safetyTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      final location = GoRouterState.of(context).matchedLocation;
+      if (location == RoutePaths.splash) {
+        context.go(RoutePaths.onboarding);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _safetyTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
