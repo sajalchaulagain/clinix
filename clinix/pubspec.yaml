@@ -1,7 +1,7 @@
 name: clinix
 description: "CliniX - Your Smart Healthcare Companion. Smart Healthcare, Medicine & Blood Support Platform."
 publish_to: 'none'
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: ^3.6.0
@@ -54,6 +54,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
   uses-material-design: true
@@ -62,3 +63,13 @@ flutter:
     # .env holds PUBLIC configuration only (see .env.example).
     # It is gitignored; copy .env.example -> .env before running.
     - .env
+    - assets/icon/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/icon/app_icon.png
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/icon/app_icon.png
+  adaptive_icon_foreground_inset: 16
+  remove_alpha_ios: true

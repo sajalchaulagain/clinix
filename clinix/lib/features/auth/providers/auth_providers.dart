@@ -14,11 +14,17 @@ import '../domain/auth_repository.dart';
 /// The single binding point for the auth implementation.
 ///
 /// Swap behavior via `.env`:
-///   USE_MOCK_DATA=true  -> MockAuthRepository (default, demo mode)
-///   USE_FIREBASE=true   -> FirebaseAuthRepository (needs flutterfire config)
+///   USE_FIREBASE=true   -> FirebaseAuthRepository (Firebase Auth + Firestore).
+///                          Used whenever Firebase is enabled, regardless of
+///                          USE_MOCK_DATA. This ensures a real ID token is
+///                          available for live AI traffic (USE_LIVE_AI=true)
+///                          even when the rest of the app is in mock mode.
+///   USE_FIREBASE=false  -> MockAuthRepository (local mock, no network).
 /// No UI code changes needed when switching.
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  if (AppConfig.useFirebase && !AppConfig.useMockData) {
+  // Use real Firebase auth whenever Firebase is configured — this ensures
+  // getIdToken() works for live AI calls even while other repos use mocks.
+  if (AppConfig.useFirebase) {
     return FirebaseAuthRepository(FirebaseAuthService(), FirestoreService());
   }
   final storage = ref.watch(localStorageServiceProvider);

@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../../../app/config/app_config.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../core/providers/api_providers.dart';
 import '../../../shared/models/chat_message_model.dart';
 import '../data/api_ai_repository.dart';
@@ -12,9 +13,10 @@ import '../data/mock_ai_repository.dart';
 import '../domain/ai_repository.dart';
 
 /// Returns the real FastAPI-backed repository when USE_MOCK_DATA=false,
-/// otherwise returns the mock for offline/UI development.
+/// or when USE_LIVE_AI=true (allows live AI while keeping other mocks).
+/// Otherwise returns the mock for offline/UI development.
 final aiRepositoryProvider = Provider<AiRepository>((ref) {
-  if (!AppConfig.useMockData) {
+  if (!AppConfig.useMockData || AppConfig.useLiveAi) {
     return ApiAiRepository(ref.read(apiClientProvider));
   }
   return MockAiRepository();
@@ -101,16 +103,46 @@ class ChatController extends AutoDisposeFamilyNotifier<ChatState, AiPersona> {
         isTyping: false,
       );
     } catch (e) {
-      debugPrint('Chat error: $e');
-      if (e is DioException) {
-        debugPrint('DioException [${e.type}]: ${e.message}');
-        debugPrint('StatusCode: ${e.response?.statusCode}');
-        debugPrint('Response Data: ${e.response?.data}');
+      String errorMessage;
+
+      if (e is UnauthorizedException) {
+        debugPrint('[ChatController] 401 Unauthorized — no valid auth token.');
+        errorMessage = 'Sign in required for AI. Please sign out and sign back in.';
+      } else if (e is TimeoutAppException) {
+        debugPrint('[ChatController] Request timed out.');
+        errorMessage =
+            'The AI backend is waking up (free tier). Please wait 30 s and try again.';
+      } else if (e is ServerException && (e.statusCode == 502 || e.statusCode == 503)) {
+        debugPrint('[ChatController] Backend ${e.statusCode} — likely cold start.');
+        errorMessage =
+            'The AI backend is starting up. Please try again in a moment.';
+      } else if (e is NoNetworkException) {
+        debugPrint('[ChatController] No network.');
+        errorMessage = 'No internet connection. Please check your network.';
+      } else if (e is DioException) {
+        final status = e.response?.statusCode;
+        final body = e.response?.data;
+        debugPrint('[ChatController] DioException [${e.type}]: ${e.message}');
+        debugPrint('[ChatController] StatusCode: $status');
+        debugPrint('[ChatController] Response body: $body');
+        if (status == 401) {
+          errorMessage =
+              'Sign in required for AI. Please sign out and sign back in.';
+        } else if (status == 502 || status == 503) {
+          errorMessage =
+              'The AI backend is starting up. Please try again in a moment.';
+        } else {
+          errorMessage =
+              'The assistant could not reply right now. Please try again.';
+        }
+      } else {
+        debugPrint('[ChatController] Unexpected error: $e');
+        errorMessage = 'The assistant could not reply right now. Please try again.';
       }
+
       state = state.copyWith(
         isTyping: false,
-        errorMessage:
-            'The assistant could not reply right now. Please try again.',
+        errorMessage: errorMessage,
       );
     }
   }

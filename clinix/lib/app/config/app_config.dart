@@ -22,6 +22,11 @@ class AppConfig {
   static bool get useFirebase =>
       (dotenv.maybeGet('USE_FIREBASE') ?? 'false').toLowerCase() == 'true';
 
+  /// When true, the live AI repository (ApiAiRepository) is used even if
+  /// USE_MOCK_DATA=true. Allows testing real AI while keeping other mocks.
+  static bool get useLiveAi =>
+      (dotenv.maybeGet('USE_LIVE_AI') ?? 'false').toLowerCase() == 'true';
+
   static Duration get connectTimeout => Duration(
         milliseconds:
             int.tryParse(dotenv.maybeGet('API_CONNECT_TIMEOUT_MS') ?? '') ??
